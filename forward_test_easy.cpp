@@ -1,11 +1,41 @@
-﻿// forward_test_easy.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
-//
-
+﻿#include "dist/json/json.h"
+#include <fstream>
+using namespace std;
 #include <iostream>
+#include <algorithm>
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    ifstream file("stand_config.json");
+    Json::Value jsonRoot;
+    file >> jsonRoot;
+
+    double I = jsonRoot["engine"]["I"].asDouble(); //Момент инерции двигателя (кг / м ^ 2)
+    vector<double> M; //крутящий момент вырабатываемого двигателем(Н * м), зависим от V
+    transform(jsonRoot["engine"]["M"].begin(), jsonRoot["engine"]["M"].end(), std::back_inserter(M), [](const auto& e) { return e.asDouble(); });
+    vector<double> V ; //скорости вращения коленвала (радиан / сек)
+    transform(jsonRoot["engine"]["V"].begin(), jsonRoot["engine"]["V"].end(), std::back_inserter(V), [](const auto& e) { return e.asDouble(); });
+    double Tmax = jsonRoot["engine"]["Tmax"].asDouble(); //температура перегрева двигателя
+    double HM = jsonRoot["engine"]["HM"].asDouble(); //Коэффициент зависимости скорости нагрева от крутящего момента (𝐶∙ / (𝐻 * м * сек))
+    double HV = jsonRoot["engine"]["HV"].asDouble(); //Коэффициент зависимости скорости нагрева от скорости вращения коленвала (𝐶∙ * сек / рад2)
+    double C = jsonRoot["engine"]["C"].asDouble(); //Коэффициент зависимости скорости охлаждения от температуры двигателя и окружающей среды (1 / сек)
+
+
+    cout << "I " << I << endl;
+    cout << "M ";
+    for (double i : M)
+        std::cout << i << ' ';
+    cout << endl;
+    cout << "V ";
+    for (double i : M)
+        std::cout << i << ' ';
+    cout << endl;
+    cout << "Tmax " << Tmax << endl;
+    cout << "HM " << HM << endl;
+    cout << "HV " << HV << endl;
+    cout << "C " << C << endl;
+
+   
 }
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
