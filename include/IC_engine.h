@@ -12,11 +12,12 @@ protected:
     double HV ;         //Коэффициент зависимости скорости нагрева от скорости вращения коленвала (𝐶∙ * сек / рад2)
     
     double V_current;    //текущая скорость коленвала
+    void set_default_parameters();
     double calculate_M();
     double calculate_crankshaft_acceleration();
     double calculate_heating_rate();
 public:
-    
+    IC_Engine();
 	IC_Engine(double T_air);
     IC_Engine(double I, vector<double> M_func, vector<double> V_func, double T_max, double HM, double HV, double C, double T_air);
     engine_status simulate_step(double time_step_seconds);

@@ -1,5 +1,5 @@
 #include "../include/IC_Engine.h"
-IC_Engine::IC_Engine(double T_air) :Engine(T_air){
+void IC_Engine::set_default_parameters() {
     this->I = 10;
     this->M_func = { 20, 75, 100, 105, 75, 0 };
     this->V_func = { 0, 75, 150, 200, 250, 300 };
@@ -7,6 +7,12 @@ IC_Engine::IC_Engine(double T_air) :Engine(T_air){
     this->HM = 0.01;
     this->HV = 0.0001;
     this->C = 0.1;
+}
+IC_Engine::IC_Engine() :Engine(){
+    set_default_parameters();
+}
+IC_Engine::IC_Engine(double T_air) :Engine(T_air){
+    set_default_parameters();
 }
 IC_Engine::IC_Engine(double I, vector<double> M_func, vector<double> V_func, double T_max, double HM, double HV, double C, double T_air) :Engine(T_max, T_air) {
     this->I = I;
