@@ -1,50 +1,77 @@
 ﻿#include "dist/json/json.h"
+#include "include/IC_engine.h"
 #include <fstream>
-using namespace std;
 #include <iostream>
 #include <algorithm>
+using namespace std;
+//шаг симуляции
+double time_step_seconds = 0.002;
 
+//Момент инерции двигателя (кг / м ^ 2)
+double I = 10;
+//M компонент кусочной функции - крутящий момент вырабатываемого двигателем(Н * м), зависит от V
+vector<double> M_func = { 20, 75, 100, 105, 75,  0 };
+//V компонент кусочной функции - скорость вращения коленвала (радиан / сек)
+vector<double> V_func = { 0,  75, 150, 200, 250, 300 };
+//температура перегрева двигателя
+double T_max = 110;
+//Коэффициент зависимости скорости нагрева от крутящего момента (𝐶∙ / (𝐻 * м * сек))
+double HM = 0.01;
+//Коэффициент зависимости скорости нагрева от скорости вращения коленвала (𝐶∙ * сек / рад2)
+double HV = 0.0001;
+//Коэффициент зависимости скорости охлаждения от температуры двигателя и окружающей среды (1 / сек)
+double C = 0.1;
+void read_json_configuration() {
+    ifstream file("stand_config.json");
+    if (file.is_open()) {
+        Json::Value json_root;
+        Json::Value json_temp;
+        file >> json_root;
+        I = json_root["IC_engine"]["I"].asDouble();
+        M_func.clear();
+        json_temp = json_root["IC_engine"]["M_func"];
+        transform(json_temp.begin(), json_temp.end(), back_inserter(M_func), [](const auto& e) { return e.asDouble(); });
+        V_func.clear();
+        json_temp = json_root["IC_engine"]["V_func"];
+        transform(json_temp.begin(), json_temp.end(), back_inserter(V_func), [](const auto& e) { return e.asDouble(); });
+        T_max = json_root["IC_engine"]["T_max"].asDouble();
+        HM = json_root["IC_engine"]["HM"].asDouble();
+        HV = json_root["IC_engine"]["HV"].asDouble();
+        C = json_root["IC_engine"]["C"].asDouble();
+
+        time_step_seconds = json_root["simulation"]["time_step_seconds"].asDouble();
+    }
+}
 int main()
 {
-    ifstream file("stand_config.json");
-    Json::Value jsonRoot;
-    file >> jsonRoot;
+    read_json_configuration();
 
-    double I = jsonRoot["engine"]["I"].asDouble(); //Момент инерции двигателя (кг / м ^ 2)
-    vector<double> M; //крутящий момент вырабатываемого двигателем(Н * м), зависим от V
-    transform(jsonRoot["engine"]["M"].begin(), jsonRoot["engine"]["M"].end(), std::back_inserter(M), [](const auto& e) { return e.asDouble(); });
-    vector<double> V ; //скорости вращения коленвала (радиан / сек)
-    transform(jsonRoot["engine"]["V"].begin(), jsonRoot["engine"]["V"].end(), std::back_inserter(V), [](const auto& e) { return e.asDouble(); });
-    double Tmax = jsonRoot["engine"]["Tmax"].asDouble(); //температура перегрева двигателя
-    double HM = jsonRoot["engine"]["HM"].asDouble(); //Коэффициент зависимости скорости нагрева от крутящего момента (𝐶∙ / (𝐻 * м * сек))
-    double HV = jsonRoot["engine"]["HV"].asDouble(); //Коэффициент зависимости скорости нагрева от скорости вращения коленвала (𝐶∙ * сек / рад2)
-    double C = jsonRoot["engine"]["C"].asDouble(); //Коэффициент зависимости скорости охлаждения от температуры двигателя и окружающей среды (1 / сек)
-
-
-    cout << "I " << I << endl;
-    cout << "M ";
-    for (double i : M)
+    cout << "enter current temperature of air:";
+    double T_air;
+    cin >> T_air;
+    IC_Engine engine(I, M_func, V_func, T_max, HM, HV, C, T_air);
+    cout << "engine configuration" << endl;
+    cout << "I: " << I << endl;
+    cout << "M_func: ";
+    for (double i : M_func)
         std::cout << i << ' ';
     cout << endl;
-    cout << "V ";
-    for (double i : M)
+    cout << "V_func: ";
+    for (double i : M_func)
         std::cout << i << ' ';
     cout << endl;
-    cout << "Tmax " << Tmax << endl;
-    cout << "HM " << HM << endl;
-    cout << "HV " << HV << endl;
-    cout << "C " << C << endl;
-
-   
+    cout << "T_max: " << T_max << endl;
+    cout << "HM: " << HM << endl;
+    cout << "HV: " << HV << endl;
+    cout << "C: " << C << endl;
+    cout << endl << "Engine started" << endl;
+    cout << "---------------" << endl;;
+    Engine::engine_status status = Engine::engine_status::OK;
+    double timer = 0;
+    while (status == Engine::engine_status::OK) {
+        status = engine.simulate_step(time_step_seconds);
+        cout << "time" << timer << " temperature: " << engine.get_T_current() << " status:" << status << endl;
+        timer += time_step_seconds;
+    }
+    cout << "time from start:" << timer << " seconds";
 }
-
-// Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
-// Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
-
-// Советы по началу работы 
-//   1. В окне обозревателя решений можно добавлять файлы и управлять ими.
-//   2. В окне Team Explorer можно подключиться к системе управления версиями.
-//   3. В окне "Выходные данные" можно просматривать выходные данные сборки и другие сообщения.
-//   4. В окне "Список ошибок" можно просматривать ошибки.
-//   5. Последовательно выберите пункты меню "Проект" > "Добавить новый элемент", чтобы создать файлы кода, или "Проект" > "Добавить существующий элемент", чтобы добавить в проект существующие файлы кода.
-//   6. Чтобы снова открыть этот проект позже, выберите пункты меню "Файл" > "Открыть" > "Проект" и выберите SLN-файл.

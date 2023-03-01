@@ -21,7 +21,10 @@
     <ClCompile Include="dist\jsoncpp.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="engine.cpp">
+    <ClCompile Include="lib\IC_engine.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\engine.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,8 +35,14 @@
     <ClInclude Include="dist\json\json-forwards.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="engine.h">
+    <ClInclude Include="include\IC_engine.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="include\engine.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="stand_config.json" />
   </ItemGroup>
 </Project>
