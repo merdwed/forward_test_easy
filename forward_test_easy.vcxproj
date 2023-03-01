@@ -137,9 +137,10 @@
     <ClInclude Include="dist\json\json.h" />
     <ClInclude Include="include\engine.h" />
     <ClInclude Include="include\IC_engine.h" />
+    <ClInclude Include="include\test_stand.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="stand_config.json" />
+    <None Include="config.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

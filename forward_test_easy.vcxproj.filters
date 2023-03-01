@@ -41,8 +41,11 @@
     <ClInclude Include="include\engine.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="include\test_stand.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="stand_config.json" />
+    <None Include="config.json" />
   </ItemGroup>
 </Project>

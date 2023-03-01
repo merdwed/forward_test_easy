@@ -1,11 +1,15 @@
 ﻿#include "dist/json/json.h"
+#include "include/engine.h"
 #include "include/IC_engine.h"
+#include "include/test_stand.h"
 #include <fstream>
 #include <iostream>
 #include <algorithm>
 using namespace std;
 //шаг симуляции
 double time_step_seconds = 0.002;
+
+
 
 //Момент инерции двигателя (кг / м ^ 2)
 double I = 10;
@@ -21,11 +25,12 @@ double HM = 0.01;
 double HV = 0.0001;
 //Коэффициент зависимости скорости охлаждения от температуры двигателя и окружающей среды (1 / сек)
 double C = 0.1;
+Json::Value json_root;
+Json::Value json_temp;
 void read_json_configuration() {
-    ifstream file("stand_config.json");
+    ifstream file("config.json");
     if (file.is_open()) {
-        Json::Value json_root;
-        Json::Value json_temp;
+        
         file >> json_root;
         I = json_root["IC_engine"]["I"].asDouble();
         M_func.clear();
@@ -40,38 +45,24 @@ void read_json_configuration() {
         C = json_root["IC_engine"]["C"].asDouble();
 
         time_step_seconds = json_root["simulation"]["time_step_seconds"].asDouble();
+        cout << "configuration data has been read. Setted parameters:" << endl;
+        cout << json_root << endl;
+    }
+    else {
+        cout << "file \"config.json\" not found. default parameters are used" << endl;
     }
 }
 int main()
 {
     read_json_configuration();
-
-    cout << "enter current temperature of air:";
+    
     double T_air;
+    cout << "enter current temperature of air:";
     cin >> T_air;
+    
     IC_Engine engine(I, M_func, V_func, T_max, HM, HV, C, T_air);
-    cout << "engine configuration" << endl;
-    cout << "I: " << I << endl;
-    cout << "M_func: ";
-    for (double i : M_func)
-        std::cout << i << ' ';
-    cout << endl;
-    cout << "V_func: ";
-    for (double i : M_func)
-        std::cout << i << ' ';
-    cout << endl;
-    cout << "T_max: " << T_max << endl;
-    cout << "HM: " << HM << endl;
-    cout << "HV: " << HV << endl;
-    cout << "C: " << C << endl;
-    cout << endl << "Engine started" << endl;
-    cout << "---------------" << endl;;
-    Engine::engine_status status = Engine::engine_status::OK;
-    double timer = 0;
-    while (status == Engine::engine_status::OK) {
-        status = engine.simulate_step(time_step_seconds);
-        cout << "time" << timer << " temperature: " << engine.get_T_current() << " status:" << status << endl;
-        timer += time_step_seconds;
-    }
-    cout << "time from start:" << timer << " seconds";
+    
+    //стенд сделан через шаблоны. Конструктору даётся двигатель, функция которую надо мониторить, шаг симуляции и имя параметра (не обязательно)
+    Test_stand<IC_Engine, double> stand(engine, &IC_Engine::get_T_current, time_step_seconds, "temperature");
+    stand.start_simulation();
 }
